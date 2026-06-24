@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy::sprite_render::{ColorMaterial, MeshMaterial2d};
 use rand::{rng, RngExt};
 
 pub fn collision_app() -> App {
@@ -18,7 +19,7 @@ struct UI;
 struct Player;
 
 #[derive(Component)]
-struct Obstacle;
+struct Enemy;
 
 #[derive(Component)]
 struct PlayerStats {
@@ -27,7 +28,7 @@ struct PlayerStats {
 }
 
 #[derive(Component)]
-struct ObstacleStats {
+struct EnemyStats {
     radius: f32,
     damage: f32,
 }
@@ -46,7 +47,6 @@ fn setup(
             health: 100.0,
         },
         Mesh2d(meshes.add(Circle::new(30.0))),
-        // Color::srgb(1.0, 0.0, 0.0),
         MeshMaterial2d(materials.add(Color::srgb(1.0, 0.0, 0.0))),
         Transform::from_xyz(0.0, 0.0, 0.0),
     ));
@@ -56,19 +56,27 @@ fn setup(
         let x = rng.random_range(-400.0..400.0);
         let y = rng.random_range(-300.0..300.0);
         commands.spawn((
-            Obstacle,
-            ObstacleStats {
+            Enemy,
+            EnemyStats {
                 radius: radius,
                 damage: 5.0,
             },
             Mesh2d(meshes.add(Circle::new(radius))),
-            // Color::srgb(1.0, 0.0, 0.0),
             MeshMaterial2d(materials.add(Color::srgb(1.0, 1.0, 0.0))),
             Transform::from_xyz(x, y, 0.0),
         ));
     }
 
-    commands.spawn((UI, Text::new("".to_string())));
+    commands.spawn((
+        UI,
+        Text::new("".to_string()),
+        // Node {
+        //     position_type: PositionType::Absolute,
+        //     bottom: px(5),
+        //     left: px(15),
+        //     ..default()
+        // },
+    ));
 }
 
 fn move_system(
@@ -119,8 +127,8 @@ fn ui_update(
 
 fn player_collisions(
     time: Res<Time>,
-    mut player_query: Query<(&mut Transform, &mut PlayerStats), (With<Player>, Without<Obstacle>)>,
-    obstacles_query: Query<(&Transform, &ObstacleStats), (With<Obstacle>, Without<Player>)>,
+    mut player_query: Query<(&mut Transform, &mut PlayerStats), (With<Player>, Without<Enemy>)>,
+    obstacles_query: Query<(&Transform, &EnemyStats), (With<Enemy>, Without<Player>)>,
 ) {
     let Ok((transform, mut stats)) = player_query.single_mut() else {
         return;

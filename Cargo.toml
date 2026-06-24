@@ -4,11 +4,16 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-bevy = "0.18"
+bevy = "0.19"
 rand = "0.10.1"
 
 [profile.dev]
 opt-level = 1
+debug = 1
 
 [profile.dev.package."*"]
 opt-level = 3
+debug = 0
+
+[patch.crates-io]
+gpu-allocator = { path = ".cargo/gpu-allocator" }
